@@ -12,7 +12,6 @@ module Natron
 
     @shared : Bytes
 
-
     def initialize(public_key, private_key)
       pk = coerce(public_key, PUBLICKEYBYTES, "public key")
       sk = coerce(private_key, PRIVATEKEYBYTES, "private key")
@@ -23,11 +22,9 @@ module Natron
       end
     end
 
-
     def nonce_bytes : Int32
       NONCEBYTES
     end
-
 
     def encrypt(nonce : Bytes, plaintext : Bytes) : Bytes
       raise ArgumentError.new("nonce must be #{NONCEBYTES} bytes") unless nonce.size == NONCEBYTES
@@ -38,7 +35,6 @@ module Natron
       raise CryptoError.new("encryption failed") if rc != 0
       buf
     end
-
 
     def decrypt(nonce : Bytes, ciphertext : Bytes) : Bytes
       raise ArgumentError.new("nonce must be #{NONCEBYTES} bytes") unless nonce.size == NONCEBYTES
@@ -51,23 +47,28 @@ module Natron
       buf
     end
 
-
     def box(nonce : Bytes, plaintext : Bytes) : Bytes
       encrypt(nonce, plaintext)
     end
-
 
     def open(nonce : Bytes, ciphertext : Bytes) : Bytes
       decrypt(nonce, ciphertext)
     end
 
+    def wipe : Nil
+      LibSodium.sodium_memzero(@shared.to_unsafe, @shared.size)
+    end
+
+    def finalize
+      wipe
+    end
 
     private def coerce(key, expected_size : Int32, name : String) : Bytes
       bytes = case key
               when PublicKey  then key.bytes
               when PrivateKey then key.bytes
               when Bytes      then key
-              else raise ArgumentError.new("#{name} must be a PublicKey/PrivateKey or Bytes")
+              else                 raise ArgumentError.new("#{name} must be a PublicKey/PrivateKey or Bytes")
               end
       raise ArgumentError.new("#{name} must be #{expected_size} bytes (got #{bytes.size})") unless bytes.size == expected_size
       bytes

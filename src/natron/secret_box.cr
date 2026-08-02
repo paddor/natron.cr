@@ -10,22 +10,18 @@ module Natron
 
     @key : Bytes
 
-
     def initialize(key : Bytes)
       raise ArgumentError.new("key must be #{KEYBYTES} bytes (got #{key.size})") unless key.size == KEYBYTES
       @key = key.dup
     end
 
-
     def nonce_bytes : Int32
       NONCEBYTES
     end
 
-
     def key_bytes : Int32
       KEYBYTES
     end
-
 
     # Returns MAC(16) || ciphertext.
     def encrypt(nonce : Bytes, plaintext : Bytes) : Bytes
@@ -38,7 +34,6 @@ module Natron
       buf
     end
 
-
     def decrypt(nonce : Bytes, ciphertext : Bytes) : Bytes
       raise ArgumentError.new("nonce must be #{NONCEBYTES} bytes") unless nonce.size == NONCEBYTES
       raise CryptoError.new("ciphertext too short") if ciphertext.size < MACBYTES
@@ -50,14 +45,20 @@ module Natron
       buf
     end
 
-
     def box(nonce : Bytes, plaintext : Bytes) : Bytes
       encrypt(nonce, plaintext)
     end
 
-
     def open(nonce : Bytes, ciphertext : Bytes) : Bytes
       decrypt(nonce, ciphertext)
+    end
+
+    def wipe : Nil
+      LibSodium.sodium_memzero(@key.to_unsafe, @key.size)
+    end
+
+    def finalize
+      wipe
     end
   end
 end

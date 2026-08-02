@@ -2,19 +2,20 @@ module Natron
   class PrivateKey
     BYTES = 32
 
+    @bytes : Bytes
+
     def self.generate : PrivateKey
       new(Random.random_bytes(BYTES))
     end
-
-
-    getter bytes : Bytes
-
 
     def initialize(key : Bytes)
       raise ArgumentError.new("private key must be #{BYTES} bytes (got #{key.size})") unless key.size == BYTES
       @bytes = key.dup
     end
 
+    def bytes : Bytes
+      @bytes.dup
+    end
 
     # Derive the corresponding public key via Curve25519 scalar base multiplication.
     def public_key : PublicKey
@@ -25,13 +26,11 @@ module Natron
       PublicKey.new(buf)
     end
 
-
     # Raw X25519 Diffie-Hellman shared secret — no HSalsa20 KDF applied.
     # Callers must derive symmetric keys from the result themselves.
     def diffie_hellman(peer : PublicKey) : Bytes
       diffie_hellman(peer.bytes)
     end
-
 
     def diffie_hellman(peer : Bytes) : Bytes
       raise ArgumentError.new("peer public key must be #{BYTES} bytes") unless peer.size == BYTES
@@ -42,9 +41,16 @@ module Natron
       buf
     end
 
-
     def to_slice : Bytes
-      @bytes
+      bytes
+    end
+
+    def wipe : Nil
+      LibSodium.sodium_memzero(@bytes.to_unsafe, @bytes.size)
+    end
+
+    def finalize
+      wipe
     end
   end
 end
