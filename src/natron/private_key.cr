@@ -20,13 +20,14 @@ module Natron
     # Derive the corresponding public key via Curve25519 scalar base multiplication.
     def public_key : PublicKey
       buf = Bytes.new(BYTES)
-      if LibSodium.crypto_scalarmult_curve25519_base(buf.to_unsafe, @bytes.to_unsafe) != 0
-        raise CryptoError.new("scalarmult_base failed")
-      end
+      Sodium.check(
+        LibSodium.crypto_scalarmult_curve25519_base(buf.to_unsafe, @bytes.to_unsafe),
+        "scalarmult_base"
+      )
       PublicKey.new(buf)
     end
 
-    # Raw X25519 Diffie-Hellman shared secret — no HSalsa20 KDF applied.
+    # Raw X25519 Diffie-Hellman shared secret. No HSalsa20 KDF applied.
     # Callers must derive symmetric keys from the result themselves.
     def diffie_hellman(peer : PublicKey) : Bytes
       diffie_hellman(peer.bytes)
@@ -35,9 +36,10 @@ module Natron
     def diffie_hellman(peer : Bytes) : Bytes
       raise ArgumentError.new("peer public key must be #{BYTES} bytes") unless peer.size == BYTES
       buf = Bytes.new(BYTES)
-      if LibSodium.crypto_scalarmult_curve25519(buf.to_unsafe, @bytes.to_unsafe, peer.to_unsafe) != 0
-        raise CryptoError.new("scalarmult failed")
-      end
+      Sodium.check(
+        LibSodium.crypto_scalarmult_curve25519(buf.to_unsafe, @bytes.to_unsafe, peer.to_unsafe),
+        "scalarmult"
+      )
       buf
     end
 

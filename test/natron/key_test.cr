@@ -12,7 +12,7 @@ describe Natron::PrivateKey do
     assert_equal 32, pk.bytes.size
   end
 
-  it "is deterministic: same scalar → same public key" do
+  it "is deterministic: same scalar gives the same public key" do
     sk = Natron::PrivateKey.generate
     pk1 = sk.public_key
     pk2 = Natron::PrivateKey.new(sk.bytes).public_key
@@ -25,6 +25,12 @@ describe Natron::PrivateKey do
     s1 = alice.diffie_hellman(bob.public_key)
     s2 = bob.diffie_hellman(alice.public_key)
     assert_equal s1.to_a, s2.to_a
+  end
+
+  it "rejects a low-order public key" do
+    assert_raises(Natron::CryptoError) do
+      Natron::PrivateKey.generate.diffie_hellman(Bytes.new(32))
+    end
   end
 
   it "rejects wrong-length keys" do

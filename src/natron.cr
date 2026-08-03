@@ -12,7 +12,7 @@ require "./natron/internals/chacha20"
 require "./natron/internals/poly1305"
 require "./natron/internals/curve25519"
 
-# Crystal binding to libsodium. Drop-in API-compatible with the pure-Crystal
-# `nuckle` shard: swap `Nuckle::` for `Natron::` and it Just Works.
+# Crystal binding to libsodium. API-compatible with the pure-Crystal
+# `nuckle` shard.
 module Natron
 end

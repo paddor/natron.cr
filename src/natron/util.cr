@@ -4,16 +4,13 @@ module Natron
       verify(a, b, 16)
     end
 
-
     def self.verify32(a : Bytes, b : Bytes) : Bool
       verify(a, b, 32)
     end
 
-
     def self.verify64(a : Bytes, b : Bytes) : Bool
       verify(a, b, 64)
     end
-
 
     def self.verify(a : Bytes, b : Bytes, expected_size : Int32? = nil) : Bool
       if exp = expected_size
