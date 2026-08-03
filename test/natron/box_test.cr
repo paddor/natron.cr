@@ -3,7 +3,7 @@ require "../test_helper"
 describe Natron::Box do
   it "roundtrips between two keypairs" do
     alice = Natron::PrivateKey.generate
-    bob   = Natron::PrivateKey.generate
+    bob = Natron::PrivateKey.generate
     nonce = Natron::Random.random_bytes(24)
 
     a_box = Natron::Box.new(bob.public_key, alice)
@@ -16,17 +16,22 @@ describe Natron::Box do
     assert_equal String.new(pt), String.new(recovered)
   end
 
-
   it "fails on mismatched keypair" do
     alice = Natron::PrivateKey.generate
-    bob   = Natron::PrivateKey.generate
-    eve   = Natron::PrivateKey.generate
+    bob = Natron::PrivateKey.generate
+    eve = Natron::PrivateKey.generate
     nonce = Natron::Random.random_bytes(24)
 
     a_box = Natron::Box.new(bob.public_key, alice)
     e_box = Natron::Box.new(alice.public_key, eve)
-    ct    = a_box.encrypt(nonce, "secret".to_slice)
+    ct = a_box.encrypt(nonce, "secret".to_slice)
 
     assert_raises(Natron::CryptoError) { e_box.decrypt(nonce, ct) }
+  end
+
+  it "rejects a low-order public key" do
+    assert_raises(Natron::CryptoError) do
+      Natron::Box.new(Bytes.new(32), Natron::PrivateKey.generate)
+    end
   end
 end

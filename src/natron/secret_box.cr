@@ -27,10 +27,13 @@ module Natron
     def encrypt(nonce : Bytes, plaintext : Bytes) : Bytes
       raise ArgumentError.new("nonce must be #{NONCEBYTES} bytes") unless nonce.size == NONCEBYTES
       buf = Bytes.new(plaintext.size + MACBYTES)
-      rc = LibSodium.crypto_secretbox_easy(
-        buf.to_unsafe, plaintext.to_unsafe, plaintext.size.to_u64,
-        nonce.to_unsafe, @key.to_unsafe)
-      raise CryptoError.new("encryption failed") if rc != 0
+      Sodium.check(
+        LibSodium.crypto_secretbox_easy(
+          buf.to_unsafe, plaintext.to_unsafe, plaintext.size.to_u64,
+          nonce.to_unsafe, @key.to_unsafe
+        ),
+        "secretbox encryption"
+      )
       buf
     end
 
@@ -38,10 +41,13 @@ module Natron
       raise ArgumentError.new("nonce must be #{NONCEBYTES} bytes") unless nonce.size == NONCEBYTES
       raise CryptoError.new("ciphertext too short") if ciphertext.size < MACBYTES
       buf = Bytes.new(ciphertext.size - MACBYTES)
-      rc = LibSodium.crypto_secretbox_open_easy(
-        buf.to_unsafe, ciphertext.to_unsafe, ciphertext.size.to_u64,
-        nonce.to_unsafe, @key.to_unsafe)
-      raise CryptoError.new("decryption failed") if rc != 0
+      Sodium.check(
+        LibSodium.crypto_secretbox_open_easy(
+          buf.to_unsafe, ciphertext.to_unsafe, ciphertext.size.to_u64,
+          nonce.to_unsafe, @key.to_unsafe
+        ),
+        "secretbox decryption"
+      )
       buf
     end
 

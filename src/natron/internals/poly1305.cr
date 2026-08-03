@@ -5,8 +5,12 @@ module Natron
       def self.mac(key : Bytes, message : Bytes) : Bytes
         raise ArgumentError.new("key must be 32 bytes") unless key.size == 32
         tag = Bytes.new(16)
-        LibSodium.crypto_onetimeauth_poly1305(
-          tag.to_unsafe, message.to_unsafe, message.size.to_u64, key.to_unsafe)
+        Sodium.check(
+          LibSodium.crypto_onetimeauth_poly1305(
+            tag.to_unsafe, message.to_unsafe, message.size.to_u64, key.to_unsafe
+          ),
+          "crypto_onetimeauth_poly1305"
+        )
         tag
       end
     end

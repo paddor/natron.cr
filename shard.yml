@@ -1,5 +1,6 @@
 name: natron
 version: 0.1.0
+repository: https://github.com/paddor/natron.cr
 
 description: |
   Crystal binding to libsodium. Covers Curve25519, XSalsa20-Poly1305,

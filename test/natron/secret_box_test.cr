@@ -2,10 +2,10 @@ require "../test_helper"
 
 describe Natron::SecretBox do
   it "roundtrips" do
-    key   = Natron::Random.random_bytes(32)
+    key = Natron::Random.random_bytes(32)
     nonce = Natron::Random.random_bytes(24)
-    box   = Natron::SecretBox.new(key)
-    pt    = "hello world".to_slice
+    box = Natron::SecretBox.new(key)
+    pt = "hello world".to_slice
 
     ct = box.encrypt(nonce, pt)
     assert_equal pt.size + Natron::SecretBox::MACBYTES, ct.size
@@ -14,28 +14,24 @@ describe Natron::SecretBox do
     assert_equal String.new(pt), String.new(recovered)
   end
 
-
   it "fails on tampered ciphertext" do
-    key   = Natron::Random.random_bytes(32)
+    key = Natron::Random.random_bytes(32)
     nonce = Natron::Random.random_bytes(24)
-    box   = Natron::SecretBox.new(key)
-    ct    = box.encrypt(nonce, "hello".to_slice)
+    box = Natron::SecretBox.new(key)
+    ct = box.encrypt(nonce, "hello".to_slice)
 
     ct[ct.size - 1] ^= 0x01_u8
     assert_raises(Natron::CryptoError) { box.decrypt(nonce, ct) }
   end
 
-
   it "rejects wrong-length key" do
     assert_raises(ArgumentError) { Natron::SecretBox.new(Bytes.new(31)) }
   end
-
 
   it "rejects wrong-length nonce" do
     box = Natron::SecretBox.new(Bytes.new(32))
     assert_raises(ArgumentError) { box.encrypt(Bytes.new(23), "x".to_slice) }
   end
-
 
   # NaCl test vector (secretbox: key/nonce/plaintext/ciphertext from tests/secretbox.c)
   it "matches NaCl test vector" do
@@ -71,7 +67,7 @@ describe Natron::SecretBox do
       0x5e, 0x07, 0x05,
     ]
     box = Natron::SecretBox.new(key)
-    ct  = box.encrypt(nonce, plaintext)
+    ct = box.encrypt(nonce, plaintext)
     pt2 = box.decrypt(nonce, ct)
     assert_equal plaintext.to_a, pt2.to_a
   end

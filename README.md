@@ -1,8 +1,8 @@
 # Natron
 
-Crystal binding to [libsodium](https://libsodium.org). The production
-crypto backend for [omq.cr](../omq.cr); also the reference against which
-[nuckle.cr](../nuckle.cr) benchmarks itself.
+Crystal binding to [libsodium](https://libsodium.org). Natron wraps a small
+NaCl-compatible surface: Curve25519, XSalsa20-Poly1305, raw Salsa20/ChaCha20
+streams, Poly1305, and constant-time byte verification.
 
 ## Installation
 
@@ -14,14 +14,14 @@ dependencies:
     github: paddor/natron.cr
 ```
 
-Requires libsodium ≥ 1.0.18 installed system-wide (`apt install libsodium-dev`,
+Requires libsodium >= 1.0.18 installed system-wide (`apt install libsodium-dev`,
 `brew install libsodium`, etc.). `sodium_init` is called automatically
 at load time.
 
 ## Usage
 
-API mirrors [nuckle.cr](../nuckle.cr) exactly — swap the module name and
-you're done.
+API mirrors the pure Crystal [Nuckle](https://github.com/paddor/nuckle.cr)
+shard for the shared primitives.
 
 ```crystal
 require "natron"
@@ -51,6 +51,9 @@ ciphertext = box.encrypt(nonce, "hello".to_slice)
 plaintext  = box.decrypt(nonce, ciphertext)
 ```
 
+Never reuse a nonce with the same key. `Natron::Random.random_bytes(24)` is
+the safest default for `Box` and `SecretBox` nonces.
+
 ## Primitives
 
 | Primitive | libsodium function |
@@ -68,8 +71,9 @@ plaintext  = box.decrypt(nonce, ciphertext)
 
 ## Not included
 
-BLAKE3 and ChaCha20-BLAKE3 AEAD — libsodium doesn't ship either. Use
-`nuckle.cr` or a dedicated BLAKE3 binding for those.
+BLAKE3 and ChaCha20-BLAKE3 AEAD are not included. Libsodium does not ship
+either. Use [Nuckle](https://github.com/paddor/nuckle.cr) or a dedicated
+BLAKE3 binding for those.
 
 ## License
 

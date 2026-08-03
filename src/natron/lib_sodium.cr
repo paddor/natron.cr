@@ -8,16 +8,16 @@ module Natron
     fun randombytes_buf(buf : UInt8*, size : LibC::SizeT) : Void
 
     # Curve25519 scalar multiplication
-    CRYPTO_SCALARMULT_CURVE25519_BYTES        =  32
-    CRYPTO_SCALARMULT_CURVE25519_SCALARBYTES  =  32
+    CRYPTO_SCALARMULT_CURVE25519_BYTES       = 32
+    CRYPTO_SCALARMULT_CURVE25519_SCALARBYTES = 32
 
     fun crypto_scalarmult_curve25519(q : UInt8*, n : UInt8*, p : UInt8*) : LibC::Int
     fun crypto_scalarmult_curve25519_base(q : UInt8*, n : UInt8*) : LibC::Int
 
     # SecretBox (XSalsa20-Poly1305)
-    CRYPTO_SECRETBOX_KEYBYTES    = 32
-    CRYPTO_SECRETBOX_NONCEBYTES  = 24
-    CRYPTO_SECRETBOX_MACBYTES    = 16
+    CRYPTO_SECRETBOX_KEYBYTES   = 32
+    CRYPTO_SECRETBOX_NONCEBYTES = 24
+    CRYPTO_SECRETBOX_MACBYTES   = 16
 
     fun crypto_secretbox_easy(c : UInt8*, m : UInt8*, mlen : UInt64,
                               n : UInt8*, k : UInt8*) : LibC::Int
@@ -43,10 +43,10 @@ module Natron
                                      n : UInt8*, k : UInt8*) : LibC::Int
 
     # HSalsa20 (key derivation)
-    CRYPTO_CORE_HSALSA20_OUTPUTBYTES    = 32
-    CRYPTO_CORE_HSALSA20_INPUTBYTES     = 16
-    CRYPTO_CORE_HSALSA20_KEYBYTES       = 32
-    CRYPTO_CORE_HSALSA20_CONSTBYTES     = 16
+    CRYPTO_CORE_HSALSA20_OUTPUTBYTES = 32
+    CRYPTO_CORE_HSALSA20_INPUTBYTES  = 16
+    CRYPTO_CORE_HSALSA20_KEYBYTES    = 32
+    CRYPTO_CORE_HSALSA20_CONSTBYTES  = 16
 
     fun crypto_core_hsalsa20(out : UInt8*, in : UInt8*, k : UInt8*, c : UInt8*) : LibC::Int
 
@@ -54,9 +54,9 @@ module Natron
     CRYPTO_STREAM_XSALSA20_KEYBYTES   = 32
     CRYPTO_STREAM_XSALSA20_NONCEBYTES = 24
     CRYPTO_STREAM_SALSA20_KEYBYTES    = 32
-    CRYPTO_STREAM_SALSA20_NONCEBYTES  = 8
+    CRYPTO_STREAM_SALSA20_NONCEBYTES  =  8
     CRYPTO_STREAM_CHACHA20_KEYBYTES   = 32
-    CRYPTO_STREAM_CHACHA20_NONCEBYTES = 8
+    CRYPTO_STREAM_CHACHA20_NONCEBYTES =  8
 
     fun crypto_stream_xsalsa20(c : UInt8*, clen : UInt64, n : UInt8*, k : UInt8*) : LibC::Int
     fun crypto_stream_xsalsa20_xor(c : UInt8*, m : UInt8*, mlen : UInt64,
@@ -73,6 +73,14 @@ module Natron
     CRYPTO_ONETIMEAUTH_POLY1305_KEYBYTES = 32
 
     fun crypto_onetimeauth_poly1305(out : UInt8*, in : UInt8*, inlen : UInt64, k : UInt8*) : LibC::Int
+  end
+
+  module Sodium
+    extend self
+
+    def check(rc : LibC::Int, operation : String) : Nil
+      raise CryptoError.new("#{operation} failed") if rc != 0
+    end
   end
 
   # Initialize libsodium on load. Idempotent; safe from multiple threads.
